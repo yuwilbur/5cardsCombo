@@ -14,12 +14,40 @@ namespace ExpressionParser {
     postfix.reserve(infix.size());
     std::stack<std::string> operatorStack;
     for (auto& token : infix) {
-      const bool isDigit = (std::isdigit(token[0]) != 0);
-      if (isDigit) {
+      // 1. If digit, push to output
+      // 2. If "(", push to stack
+      // 3. If ")", pop stack until "(" is found
+      // 4. If operator, pop all higher precedence in stack then push current operator to stack
+      if (std::isdigit(token[0]) != 0) {
         postfix.push_back(token);
-        continue;
       }
-      operatorStack.push(token);
+      else if (token == "(") {
+        operatorStack.push(token);
+      }
+      else if (token == ")") {
+        while (!operatorStack.empty()) {
+          const std::string op = operatorStack.top();
+          operatorStack.pop();
+          if (op == "(")
+            break;
+          postfix.push_back(op);
+        }
+      }
+      else {
+        if (token == "+" || token == "-") {
+          while (!operatorStack.empty()) {
+            const std::string op = operatorStack.top();
+            if (op == "*" || op == "/") {
+              postfix.push_back(op);
+              operatorStack.pop();
+            }
+            else {
+              break;
+            }
+          }
+        }
+        operatorStack.push(token);
+      }
     }
     while (!operatorStack.empty()) {
       postfix.push_back(operatorStack.top());
