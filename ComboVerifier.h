@@ -45,27 +45,21 @@ public:
   }
 
   bool VerifyHand(const int target, const std::array<int, CARDS>& hand) {
-    auto operations = ConstructAllOperations(hand);
-    for (auto& operation : operations) {
-      if (ExpressionParser::EvaluateExpression(operation) == target)
-        return true;
-    }
-    return false;
-  }
-
-  std::vector<std::vector<std::string>> ConstructAllOperations(const std::array<int, CARDS>& hand) {
-    std::vector<std::vector<std::string>> operations = {};
     std::array<std::string, CARDS> handStr = {};
     for (size_t i = 0; i < hand.size(); ++i) {
       handStr[i] = std::to_string(hand[i]);
     }
+
+    const std::vector<std::string> primitiveOperations = { "*", "/", "+", "-" };
+    std::array<size_t, CARDS> primitiveIndexes = {}; // The extra index is used to check if the indexes have overflown
     std::vector<std::string> operation = {};
     for (auto& card : handStr) {
       operation.push_back(card);
       operation.push_back("*");
     }
     operation.pop_back();
-    operations.push_back(operation);
-    return operations;
+    if (ExpressionParser::EvaluateExpression(operation) == target)
+      return true;
+    return false;
   }
 };
