@@ -61,10 +61,6 @@ public:
         }
       }
       if (ExpressionParser::EvaluateExpression(operation) == target) {
-        for (auto& token : operation) {
-          std::cout << token << " ";
-        }
-        std::cout << std::endl;
         return true;
       }
       primitiveIndexes[0]++;
@@ -75,6 +71,10 @@ public:
         primitiveIndexes[i + 1]++;
       }
     }
+    for (auto& token : hand) {
+      std::cout << token << " ";
+    }
+    std::cout << std::endl;
     return false;
   }
 };
