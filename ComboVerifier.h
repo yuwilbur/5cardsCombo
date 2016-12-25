@@ -5,6 +5,9 @@
 #include <string>
 #include <functional>
 
+#include <fstream>
+#include <iostream>
+
 #include "ExpressionParser.h"
 
 template<int CARDS>
@@ -17,30 +20,52 @@ public:
     if (validCards.size() == 0)
       throw std::invalid_argument("No valid cards detected");
     std::vector<std::array<int, CARDS>> hands = {};
-    std::array<size_t, CARDS + 1> indexes = {}; // The extra index is used to check if the indexes have overflown
+    std::array<size_t, CARDS> indexes = {}; // The extra index is used to check if the indexes have overflown
     std::array<int, CARDS> hand = {};
-    while (indexes[indexes.size() - 1] == 0) {
+    size_t indexesIndex = 0;
+    while (indexes[0] < validCards.size()) {
       for (size_t i = 0; i < hand.size(); ++i) {
         hand[i] = validCards[indexes[i]];
       }
       hands.push_back(hand);
-      indexes[0]++;
-      for (size_t i = 0; i < indexes.size() - 1; ++i) {
-        if (indexes[i] < validCards.size())
-          break;
-        indexes[i] = 0;
-        indexes[i + 1]++;
+
+      if (indexesIndex == indexes.size()) {
+        indexesIndex--;
+        while (indexes[indexesIndex] == indexes[indexesIndex - 1]) {
+          indexes[indexesIndex] = 0;
+          indexesIndex--;
+        }
       }
+      indexes[indexesIndex++]++;
     }
     return hands;
   }
 
   std::vector<std::array<int, CARDS>> VerifyAllHands(const int target, const std::vector<std::array<int, CARDS>>& hands) {
     std::vector<std::array<int, CARDS>> validHands = {};
+    std::ofstream goodFile;
+    goodFile.open("good.txt");
+    
+    std::ofstream badFile;
+    badFile.open("bad.txt");
     for (auto& hand : hands) {
-      if (VerifyHand(target, hand))
+      std::string handStr = "";
+      for (auto& card : hand) {
+        handStr += std::to_string(card) + " ";
+      }
+      if (VerifyHand(target, hand)) {
         validHands.push_back(hand);
+        std::cout << ".";
+        goodFile << handStr << std::endl;
+      }
+      else {
+        std::cout << "X";
+        badFile << handStr << std::endl;
+      }
     }
+    goodFile.close();
+    badFile.close();
+    std::cout << std::endl;
     return validHands;
   }
 
