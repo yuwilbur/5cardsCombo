@@ -4,19 +4,23 @@
 #include <iostream>
 
 #include "ComboVerifier.h"
+#include "ExpressionParser.h"
 
 int main()
 {
-  ComboVerifier<5> cv;
-  const std::vector<char> validCards = {
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10
+  ComboVerifier<4> cv;
+  const std::vector<int> validCards = {
+    1, 2, 3, 4, 5, 6
   };
 
   auto allHands = cv.ConstructAllHands({ validCards });
-  std::cout << allHands.size() << std::endl;
   auto goodHands = cv.VerifyAllHands(24, allHands);
-  std::cout << goodHands.size() << std::endl;
+  for (auto& hand : goodHands) {
+    for (auto& card : hand) {
+      std::cout << std::to_string(card) << " ";
+    }
+    std::cout << std::endl;
+  }
 
   return 0;
 }
-

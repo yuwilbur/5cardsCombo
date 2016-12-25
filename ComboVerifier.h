@@ -2,7 +2,10 @@
 
 #include <array>
 #include <vector>
+#include <string>
 #include <functional>
+
+#include "ExpressionParser.h"
 
 template<int CARDS>
 class ComboVerifier
@@ -10,12 +13,12 @@ class ComboVerifier
 public:
   ComboVerifier() = default;
 
-  std::vector<std::array<char, CARDS>> ConstructAllHands(const std::vector<char>& validCards) {
+  std::vector<std::array<int, CARDS>> ConstructAllHands(const std::vector<int>& validCards) {
     if (validCards.size() == 0)
       throw std::invalid_argument("No valid cards detected");
-    std::vector<std::array<char, CARDS>> hands = {};
+    std::vector<std::array<int, CARDS>> hands = {};
     std::array<size_t, CARDS + 1> indexes = {}; // The extra index is used to check if the indexes have overflown
-    std::array<char, CARDS> hand = {};
+    std::array<int, CARDS> hand = {};
     while (indexes[indexes.size() - 1] == 0) {
       for (size_t i = 0; i < hand.size(); ++i) {
         hand[i] = validCards[indexes[i]];
@@ -32,31 +35,37 @@ public:
     return hands;
   }
 
-  std::vector<std::array<char, CARDS>> VerifyAllHands(const int target, const std::vector<std::array<char, CARDS>>& hands) {
-    std::vector<std::array<char, CARDS>> validHands = {};
+  std::vector<std::array<int, CARDS>> VerifyAllHands(const int target, const std::vector<std::array<int, CARDS>>& hands) {
+    std::vector<std::array<int, CARDS>> validHands = {};
     for (auto& hand : hands) {
-      if (VerifyHand(target, hand, ConstructAllOperations()))
+      if (VerifyHand(target, hand))
         validHands.push_back(hand);
     }
     return validHands;
   }
 
-  bool VerifyHand(const int target, const std::array<char, CARDS>& hand, const std::vector<std::function<int(const std::array<char, CARDS>&)>>& operations) {
+  bool VerifyHand(const int target, const std::array<int, CARDS>& hand) {
+    auto operations = ConstructAllOperations(hand);
     for (auto& operation : operations) {
-      if (operation(hand) == target)
+      if (ExpressionParser::EvaluateExpression(operation) == target)
         return true;
     }
     return false;
   }
 
-  std::vector<std::function<int(const std::array<char, CARDS>&)>> ConstructAllOperations() {
-    auto operation = [](const std::array<char, CARDS>& cards) -> int {
-      int result = 0;
-      for (auto& card : cards) {
-        result += card;
-      }
-      return result;
-    };
-    return{operation};
+  std::vector<std::vector<std::string>> ConstructAllOperations(const std::array<int, CARDS>& hand) {
+    std::vector<std::vector<std::string>> operations = {};
+    std::array<std::string, CARDS> handStr = {};
+    for (size_t i = 0; i < hand.size(); ++i) {
+      handStr[i] = std::to_string(hand[i]);
+    }
+    std::vector<std::string> operation = {};
+    for (auto& card : handStr) {
+      operation.push_back(card);
+      operation.push_back("*");
+    }
+    operation.pop_back();
+    operations.push_back(operation);
+    return operations;
   }
 };
