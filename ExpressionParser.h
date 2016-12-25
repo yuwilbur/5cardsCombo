@@ -37,7 +37,19 @@ namespace ExpressionParser {
         if (token == "+" || token == "-") {
           while (!operatorStack.empty()) {
             const std::string op = operatorStack.top();
-            if (op == "*" || op == "/") {
+            if (op != "(") {
+              postfix.push_back(op);
+              operatorStack.pop();
+            }
+            else {
+              break;
+            }
+          }
+        }
+        if (token == "*" || token == "/") {
+          while (!operatorStack.empty()) {
+            const std::string op = operatorStack.top();
+            if (op != "(" && op != "+" && op != "-") {
               postfix.push_back(op);
               operatorStack.pop();
             }
@@ -57,6 +69,11 @@ namespace ExpressionParser {
   }
 
   float EvaluateExpression(const std::vector<std::string>& expression) {
+    //for (auto& token : expression) {
+    //  std::cout << token << " ";
+    //}
+    //std::cout << std::endl;
+
     const auto evaluatePostfix = [](const std::string& leftOperand, const std::string& rightOperand, const std::string& operatorValue) -> float {
       const float leftValue = std::stof(leftOperand);
       const float rightValue = std::stof(rightOperand);

@@ -50,16 +50,31 @@ public:
       handStr[i] = std::to_string(hand[i]);
     }
 
-    const std::vector<std::string> primitiveOperations = { "*", "/", "+", "-" };
+    const std::vector<std::string> primitiveOperations = { "+", "-", "*", "/" };
     std::array<size_t, CARDS> primitiveIndexes = {}; // The extra index is used to check if the indexes have overflown
-    std::vector<std::string> operation = {};
-    for (auto& card : handStr) {
-      operation.push_back(card);
-      operation.push_back("*");
+    while (primitiveIndexes[primitiveIndexes.size() - 1] == 0) {
+      std::vector<std::string> operation = {};
+      for (size_t i = 0; i < handStr.size(); ++i) {
+        operation.push_back(handStr[i]);
+        if (i < handStr.size() - 1) {
+          operation.push_back(primitiveOperations[primitiveIndexes[i]]);
+        }
+      }
+      if (ExpressionParser::EvaluateExpression(operation) == target) {
+        for (auto& token : operation) {
+          std::cout << token << " ";
+        }
+        std::cout << std::endl;
+        return true;
+      }
+      primitiveIndexes[0]++;
+      for (size_t i = 0; i < primitiveIndexes.size() - 1; ++i) {
+        if (primitiveIndexes[i] < primitiveOperations.size())
+          break;
+        primitiveIndexes[i] = 0;
+        primitiveIndexes[i + 1]++;
+      }
     }
-    operation.pop_back();
-    if (ExpressionParser::EvaluateExpression(operation) == target)
-      return true;
     return false;
   }
 };

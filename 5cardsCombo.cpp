@@ -15,12 +15,6 @@ int main()
 
   auto allHands = cv.ConstructAllHands({ validCards });
   auto goodHands = cv.VerifyAllHands(24, allHands);
-  for (auto& hand : goodHands) {
-    for (auto& card : hand) {
-      std::cout << std::to_string(card) << " ";
-    }
-    std::cout << std::endl;
-  }
 
   return 0;
 }
