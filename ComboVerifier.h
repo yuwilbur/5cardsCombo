@@ -18,6 +18,7 @@ public:
     primitiveOperations_({ "+", "-", "*", "/" })
   {
     brackets_ = {
+      { 0, 1, 2, 3, 4, 5, 6},
       { -1, 0, 1, 2, -2, 3, 4, 5, 6 },
       { 0, 1, -1, 2, 3, 4, -2, 5, 6 },
       { 0, 1, 2, 3, -1, 4, 5, 6, -2 },
@@ -58,7 +59,7 @@ public:
 
     goodFile_.open("good.txt");
     badFile_.open("bad.txt");
-  };
+  }
 
   std::vector<std::array<int, CARDS>> ConstructAllHands(const std::vector<int>& validCards) {
     if (validCards.size() == 0)
@@ -104,42 +105,27 @@ public:
     for (size_t i = 0; i < hand.size(); ++i) {
       handStr[i] = std::to_string(hand[i]);
     }
-    const std::array<std::string, CARDS> handStrOrdered = handStr;
-    handStr = {};
-
+    
     for (auto& order : order_) {
-      for (size_t i = 0; i < order.size(); ++i) {
-        handStr[i] = handStrOrdered[order[i]];
-      }
       for (auto& primitives : primitives_) {
-        std::vector<std::string> operation = {};
-        for (size_t i = 0; i < handStr.size(); ++i) {
-          operation.push_back(handStr[i]);
-          if (i < handStr.size() - 1) {
-            operation.push_back(primitiveOperations_[primitives[i]]);
+        for (auto& brackets : brackets_) {
+          std::vector<std::string> operation = {};
+          for (size_t i = 0; i < brackets.size(); ++i) {
+            const int index = brackets[i];
+            if (index == -1)
+              operation.push_back("(");
+            else if (index == -2)
+              operation.push_back(")");
+            else {
+              if (index % 2 == 0)
+                operation.push_back(handStr[order[index / 2]]);
+              else
+                operation.push_back(primitiveOperations_[primitives[index / 2]]);
+            }
           }
-        }
-        if (ExpressionParser::EvaluateExpression(operation) == target) {
-          std::string result = "";
-          for (auto& token : operation) {
-            result += token;
-          }
-          goodFile_ << result << std::endl;
-          return true;
-        }
-        for (auto& bracket : brackets_) {
-          std::vector<std::string> bracketOperation = {};
-          for (auto& item : bracket) {
-            if (item == -1)
-              bracketOperation.push_back("(");
-            else if (item == -2)
-              bracketOperation.push_back(")");
-            else
-              bracketOperation.push_back(operation[item]);
-          }
-          if (ExpressionParser::EvaluateExpression(bracketOperation) == target) {
+          if (ExpressionParser::EvaluateExpression(operation) == target) {
             std::string result = "";
-            for (auto& token : bracketOperation) {
+            for (auto& token : operation) {
               result += token;
             }
             goodFile_ << result << std::endl;
