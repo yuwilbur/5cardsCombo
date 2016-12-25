@@ -47,7 +47,6 @@ public:
 
   std::vector<std::array<int, CARDS>> VerifyAllHands(const int target, const std::vector<std::array<int, CARDS>>& hands) {
     std::vector<std::array<int, CARDS>> validHands = {};
-
     for (auto& hand : hands) {
       if (VerifyHand(target, hand))
         validHands.push_back(hand);
@@ -109,27 +108,46 @@ private:
   const std::array<std::string, 4> primitiveOperations_;
 
   void Initialize() {
-    //std::vector<int> bracket(CARDS * 2 - 1);
-    //for (size_t i = 0; i < bracket.size(); ++i) {
-    //  bracket[i] = i;
-    //}
-    //brackets_.push_back(bracket);
-    //while (true) {
-
-    //}
-    brackets_ = {
-      { 0, 1, 2, 3, 4, 5, 6},
-      { -1, 0, 1, 2, -2, 3, 4, 5, 6 },
-      { 0, 1, -1, 2, 3, 4, -2, 5, 6 },
-      { 0, 1, 2, 3, -1, 4, 5, 6, -2 },
-      { -1, 0, 1, 2, 3, 4, -2, 5, 6 },
-      { 0, 1, -1, 2, 3, 4, 5, 6, -2 },
-      { -1, 0, 1, 2, -2, -1, 3, 4, 5, 6, -2 },
-      { -1, -1, 0, 1, 2, -2, 3, 4, -2, 5, 6 },
-      { -1, 0, 1, -1, 2, 3, 4, -2, -2, 5, 6 },
-      { 0, 1, -1, -1, 2, 3, 4, -2, 5, 6, -2 },
-      { 0, 1, -1, 2, 3, -1, 4, 5, 6, -2, -2 },
-    };
+    std::vector<int> originalBlacket(CARDS * 2 - 1);
+    for (size_t i = 0; i < originalBlacket.size(); ++i) {
+      originalBlacket[i] = i;
+    }
+    brackets_.push_back(originalBlacket);
+    for (size_t cycle = 0; cycle < CARDS - 2; ++cycle) {
+      std::vector<std::vector<int>> brackets = {};
+      for (int i = brackets_.size() - 1; i >= 0; --i) {
+        if (brackets_[i].size() < brackets_.back().size())
+          break;
+        const std::vector<int> bracket = brackets_[i];
+        for (size_t start = 0; start < bracket.size(); ++start) {
+          // Look for number
+          if (bracket[start] < 0 || bracket[start] % 2 != 0)
+            continue;
+          for (size_t end = start + 1; end < bracket.size(); ++end) {
+            // If encounter a bracket, just immediately terminate
+            if (bracket[end] < 0)
+              break;
+            // Look for number
+            if (bracket[end] % 2 != 0)
+              continue;
+            // If both brackets are the both ends of the operation, then ignore this combination
+            if (
+              start == 0 && end == bracket.size() - 1 ||
+              start != 0 && bracket[start - 1] == -1 && end != bracket.size() - 1 && bracket[end + 1] == -2
+              )
+              break;
+            
+            auto newBracket = bracket;
+            newBracket.insert(newBracket.begin() + end + 1, -2);
+            newBracket.insert(newBracket.begin() + start, -1);
+            brackets.push_back(newBracket);
+          }
+        }
+      }
+      if (brackets.size() == 0)
+        break;
+      brackets_.insert(brackets_.end(), brackets.begin(), brackets.end());
+    }
 
     std::vector<int> order(CARDS);
     for (size_t i = 0; i < order.size(); ++i) {
