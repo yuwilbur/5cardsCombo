@@ -2,6 +2,7 @@
 
 #include <array>
 #include <vector>
+#include <functional>
 
 template<int CARDS>
 class ComboVerifier
@@ -31,20 +32,31 @@ public:
     return hands;
   }
 
-  std::vector<std::array<char, CARDS>> VerifyAllHands(const size_t target, const std::vector<std::array<char, CARDS>>& hands) {
+  std::vector<std::array<char, CARDS>> VerifyAllHands(const int target, const std::vector<std::array<char, CARDS>>& hands) {
     std::vector<std::array<char, CARDS>> validHands = {};
     for (auto& hand : hands) {
-      if (VerifyHand(target, hand))
+      if (VerifyHand(target, hand, ConstructAllOperations()))
         validHands.push_back(hand);
     }
     return validHands;
   }
 
-  bool VerifyHand(const size_t target, const std::array<char, CARDS>& hand) {
-    size_t result = 0;
-    for (size_t i = 0; i < hand.size(); ++i) {
-      result += hand[i];
+  bool VerifyHand(const int target, const std::array<char, CARDS>& hand, const std::vector<std::function<int(const std::array<char, CARDS>&)>>& operations) {
+    for (auto& operation : operations) {
+      if (operation(hand) == target)
+        return true;
     }
-    return result == target;
+    return false;
+  }
+
+  std::vector<std::function<int(const std::array<char, CARDS>&)>> ConstructAllOperations() {
+    auto operation = [](const std::array<char, CARDS>& cards) -> int {
+      int result = 0;
+      for (auto& card : cards) {
+        result += card;
+      }
+      return result;
+    };
+    return{operation};
   }
 };
