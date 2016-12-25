@@ -30,26 +30,18 @@ public:
       { 0, 1, -1, 2, 3, -1, 4, 5, 6, -2, -2 },
     };
 
-    //std::vector<int> order(CARDS);
-    //for (size_t i = 0; i < CARDS; ++i) {
-    //  order[i] = i;
-    //}
-    //for (size_t i = 0; i < CARDS; ++i) {
-    //  order_.push_back(order);
-    //  for (size_t j = 0; j < order.size(); ++j) {
-
-    //  }
-    //}
-
-    goodFile_.open("good.txt");
-    badFile_.open("bad.txt");
-
-    order_ = {
-      { 0, 1, 2, 3 },
-      { 3, 0, 1, 2 },
-      { 2, 3, 0, 1 },
-      { 1, 2, 3, 0 },
-    };
+    std::vector<int> order(CARDS);
+    for (size_t i = 0; i < CARDS; ++i) {
+      order[i] = i;
+    }
+    for (size_t i = 0; i < CARDS; ++i) {
+      order_.push_back(order);
+      const int orderTemp = order[0];
+      for (size_t j = 0; j < order.size() - 1; ++j) {
+        order[j] = order[j + 1];
+      }
+      order[order.size() - 1] = orderTemp;
+    }
 
     std::vector<int> primitives(CARDS - 1);
     primitives_.push_back(primitives);
@@ -63,6 +55,9 @@ public:
       }
       primitives_.push_back(primitives);
     }
+
+    goodFile_.open("good.txt");
+    badFile_.open("bad.txt");
   };
 
   std::vector<std::array<int, CARDS>> ConstructAllHands(const std::vector<int>& validCards) {
@@ -80,7 +75,7 @@ public:
 
       if (indexesIndex == indexes.size()) {
         indexesIndex--;
-        while (indexes[indexesIndex] == indexes[indexesIndex - 1]) {
+        while (indexesIndex != 0 && indexes[indexesIndex] == indexes[indexesIndex - 1]) {
           indexes[indexesIndex] = 0;
           indexesIndex--;
         }
