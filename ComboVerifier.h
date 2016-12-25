@@ -90,10 +90,6 @@ public:
     std::vector<std::array<int, CARDS>> validHands = {};
 
     for (auto& hand : hands) {
-      std::string handStr = "";
-      for (auto& card : hand) {
-        handStr += std::to_string(card) + " ";
-      }
       if (VerifyHand(target, hand))
         validHands.push_back(hand);
     }
@@ -129,6 +125,7 @@ public:
               result += token;
             }
             goodFile_ << result << std::endl;
+            std::cout << ".";
             return true;
           }
         }
@@ -139,6 +136,7 @@ public:
       result += std::to_string(token) + " ";
     }
     badFile_ << result << std::endl;
+    std::cout << "X";
     return false;
   }
 
