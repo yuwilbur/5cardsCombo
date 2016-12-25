@@ -17,48 +17,7 @@ public:
   ComboVerifier() :
     primitiveOperations_({ "+", "-", "*", "/" })
   {
-    brackets_ = {
-      { 0, 1, 2, 3, 4, 5, 6},
-      { -1, 0, 1, 2, -2, 3, 4, 5, 6 },
-      { 0, 1, -1, 2, 3, 4, -2, 5, 6 },
-      { 0, 1, 2, 3, -1, 4, 5, 6, -2 },
-      { -1, 0, 1, 2, 3, 4, -2, 5, 6 },
-      { 0, 1, -1, 2, 3, 4, 5, 6, -2 },
-      { -1, 0, 1, 2, -2, -1, 3, 4, 5, 6, -2 },
-      { -1, -1, 0, 1, 2, -2, 3, 4, -2, 5, 6 },
-      { -1, 0, 1, -1, 2, 3, 4, -2, -2, 5, 6 },
-      { 0, 1, -1, -1, 2, 3, 4, -2, 5, 6, -2 },
-      { 0, 1, -1, 2, 3, -1, 4, 5, 6, -2, -2 },
-    };
-
-    std::vector<int> order(CARDS);
-    for (size_t i = 0; i < CARDS; ++i) {
-      order[i] = i;
-    }
-    for (size_t i = 0; i < CARDS; ++i) {
-      order_.push_back(order);
-      const int orderTemp = order[0];
-      for (size_t j = 0; j < order.size() - 1; ++j) {
-        order[j] = order[j + 1];
-      }
-      order[order.size() - 1] = orderTemp;
-    }
-
-    std::vector<int> primitives(CARDS - 1);
-    primitives_.push_back(primitives);
-    for (size_t i = 0; i < std::pow(primitiveOperations_.size(), primitives.size()) - 1; ++i) {
-      primitives[0]++;
-      for (size_t j = 0; j < primitives.size(); ++j) {
-        if (primitives[j] < 4)
-          break;
-        primitives[j] = 0;
-        primitives[j + 1]++;
-      }
-      primitives_.push_back(primitives);
-    }
-
-    goodFile_.open("good.txt");
-    badFile_.open("bad.txt");
+    Initialize();
   }
 
   std::vector<std::array<int, CARDS>> ConstructAllHands(const std::vector<int>& validCards) {
@@ -96,12 +55,13 @@ public:
     return validHands;
   }
 
+protected:
   bool VerifyHand(const int target, const std::array<int, CARDS>& hand) {
     std::array<std::string, CARDS> handStr = {};
     for (size_t i = 0; i < hand.size(); ++i) {
       handStr[i] = std::to_string(hand[i]);
     }
-    
+
     for (auto& order : order_) {
       for (auto& primitives : primitives_) {
         for (auto& brackets : brackets_) {
@@ -147,4 +107,57 @@ private:
   std::vector<std::vector<int>> brackets_;
   std::vector<std::vector<int>> primitives_;
   const std::array<std::string, 4> primitiveOperations_;
+
+  void Initialize() {
+    //std::vector<int> bracket(CARDS * 2 - 1);
+    //for (size_t i = 0; i < bracket.size(); ++i) {
+    //  bracket[i] = i;
+    //}
+    //brackets_.push_back(bracket);
+    //while (true) {
+
+    //}
+    brackets_ = {
+      { 0, 1, 2, 3, 4, 5, 6},
+      { -1, 0, 1, 2, -2, 3, 4, 5, 6 },
+      { 0, 1, -1, 2, 3, 4, -2, 5, 6 },
+      { 0, 1, 2, 3, -1, 4, 5, 6, -2 },
+      { -1, 0, 1, 2, 3, 4, -2, 5, 6 },
+      { 0, 1, -1, 2, 3, 4, 5, 6, -2 },
+      { -1, 0, 1, 2, -2, -1, 3, 4, 5, 6, -2 },
+      { -1, -1, 0, 1, 2, -2, 3, 4, -2, 5, 6 },
+      { -1, 0, 1, -1, 2, 3, 4, -2, -2, 5, 6 },
+      { 0, 1, -1, -1, 2, 3, 4, -2, 5, 6, -2 },
+      { 0, 1, -1, 2, 3, -1, 4, 5, 6, -2, -2 },
+    };
+
+    std::vector<int> order(CARDS);
+    for (size_t i = 0; i < order.size(); ++i) {
+      order[i] = i;
+    }
+    for (size_t i = 0; i < CARDS; ++i) {
+      order_.push_back(order);
+      const int orderTemp = order[0];
+      for (size_t j = 0; j < order.size() - 1; ++j) {
+        order[j] = order[j + 1];
+      }
+      order[order.size() - 1] = orderTemp;
+    }
+
+    std::vector<int> primitives(CARDS - 1);
+    primitives_.push_back(primitives);
+    for (size_t i = 0; i < std::pow(primitiveOperations_.size(), primitives.size()) - 1; ++i) {
+      primitives[0]++;
+      for (size_t j = 0; j < primitives.size(); ++j) {
+        if (primitives[j] < 4)
+          break;
+        primitives[j] = 0;
+        primitives[j + 1]++;
+      }
+      primitives_.push_back(primitives);
+    }
+
+    goodFile_.open("good.txt");
+    badFile_.open("bad.txt");
+  }
 };
