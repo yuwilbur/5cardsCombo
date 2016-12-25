@@ -20,28 +20,49 @@ public:
     Initialize();
   }
 
-  std::vector<std::array<int, CARDS>> ConstructAllHands(const std::vector<int>& validCards) {
+  std::vector<std::array<int, CARDS>> ConstructAllHands(std::vector<int> validCards) {
     if (validCards.size() == 0)
       throw std::invalid_argument("No valid cards detected");
+    std::sort(validCards.begin(), validCards.end());
     std::vector<std::array<int, CARDS>> hands = {};
-    std::array<size_t, CARDS> indexes = {}; // The extra index is used to check if the indexes have overflown
-    std::array<int, CARDS> hand = {};
+    std::array<size_t, CARDS> indexes = {};
+    for (size_t i = 0; i < indexes.size(); ++i) {
+      indexes[i] = i;
+    }
+
     size_t indexesIndex = 0;
-    while (indexes[0] < validCards.size()) {
-      for (size_t i = 0; i < hand.size(); ++i) {
+    while (indexes[0] < validCards.size() - indexes.size()) {
+      std::array<int, CARDS> hand = {};
+      for (size_t i = 0; i < indexes.size(); ++i) {
         hand[i] = validCards[indexes[i]];
       }
-      hands.push_back(hand);
-
-      if (indexesIndex == indexes.size()) {
-        indexesIndex--;
-        while (indexesIndex != 0 && indexes[indexesIndex] == indexes[indexesIndex - 1]) {
-          indexes[indexesIndex] = 0;
-          indexesIndex--;
+      bool isHandsNew = true;
+      for (int i = hands.size() - 1; i >= 0; --i) {
+        if (hands[i] == hand) {
+          isHandsNew = false;
+          break;
         }
       }
-      indexes[indexesIndex++]++;
+      if (isHandsNew) {
+        hands.push_back(hand);
+      }
+        
+      if (indexes[indexesIndex] + 1 != indexes[indexesIndex + 1]) {
+        indexes[indexesIndex]++;
+        continue;
+      }
+      while (indexes[indexesIndex] + 1 == indexes[indexesIndex + 1]) {
+        indexesIndex++;
+        if (indexesIndex == indexes.size() - 1)
+          break;
+      }
+      indexes[indexesIndex]++;
+      for (size_t i = 0; i < indexesIndex; ++i) {
+        indexes[i] = i;
+      }
+      indexesIndex = 0;
     }
+
     return hands;
   }
 
@@ -136,7 +157,7 @@ private:
               start != 0 && bracket[start - 1] == -1 && end != bracket.size() - 1 && bracket[end + 1] == -2
               )
               break;
-            
+
             auto newBracket = bracket;
             newBracket.insert(newBracket.begin() + end + 1, -2);
             newBracket.insert(newBracket.begin() + start, -1);

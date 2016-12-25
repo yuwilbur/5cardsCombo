@@ -69,11 +69,6 @@ namespace ExpressionParser {
   }
 
   float EvaluateExpression(const std::vector<std::string>& expression) {
-    //for (auto& token : expression) {
-    //  std::cout << token << " ";
-    //}
-    //std::cout << std::endl;
-
     const auto evaluatePostfix = [](const std::string& leftOperand, const std::string& rightOperand, const std::string& operatorValue) -> float {
       const float leftValue = std::stof(leftOperand);
       const float rightValue = std::stof(rightOperand);
