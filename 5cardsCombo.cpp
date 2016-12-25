@@ -8,7 +8,7 @@
 
 int main()
 {
-  /*ComboVerifier<4> cv;
+  ComboVerifier<4> cv;
   const std::vector<int> validCards = {
     1, 2, 3, 4, 5, 6
   };
@@ -21,15 +21,6 @@ int main()
     }
     std::cout << std::endl;
   }
-*/
-
-  std::vector<std::string> expression = {
-    "(", "3", "+", "5", ")", "-" , "10", "/" , "2"
-  }; 
-  //std::vector<std::string> expression = {
-  //  "3", "+", "5", "*" , "4", "/" , "2"
-  //};
-  std::cout << ExpressionParser::EvaluateExpression(expression) << std::endl;
 
   return 0;
 }

@@ -56,14 +56,17 @@ namespace ExpressionParser {
     return postfix;
   }
 
-  int EvaluateExpression(const std::vector<std::string>& expression) {
-    const auto evaluatePostfix = [](const std::string& leftOperand, const std::string& rightOperand, const std::string& operatorValue) -> int {
-      const int leftValue = std::stoi(leftOperand);
-      const int rightValue = std::stoi(rightOperand);
+  float EvaluateExpression(const std::vector<std::string>& expression) {
+    const auto evaluatePostfix = [](const std::string& leftOperand, const std::string& rightOperand, const std::string& operatorValue) -> float {
+      const float leftValue = std::stof(leftOperand);
+      const float rightValue = std::stof(rightOperand);
       if (operatorValue == "*") return leftValue * rightValue;
-      if (operatorValue == "/") return leftValue / rightValue;
       if (operatorValue == "-") return leftValue - rightValue;
       if (operatorValue == "+") return leftValue + rightValue;
+      if (operatorValue == "/") {
+        if (rightValue == 0.f) return 99999.9f;
+        return leftValue / rightValue;
+      }
       throw std::invalid_argument("Operator is not supported");
     };
     std::vector<std::string> postfix = InfixToPostfix(expression);
@@ -77,6 +80,6 @@ namespace ExpressionParser {
     }
     if (postfix.size() != 1)
       throw std::runtime_error("Expression failed to be evaluated");
-    return std::stoi(postfix[0]);
+    return std::stof(postfix[0]);
   }
 }
