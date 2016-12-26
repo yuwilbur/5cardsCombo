@@ -12,8 +12,8 @@ int main()
   const std::vector<int> validCards = {
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-    1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 
+    1, 2, 3, 4, 5, 6, 7, 8, 9, 
   };
 
   auto allHands = cv.ConstructAllHands({ validCards });
