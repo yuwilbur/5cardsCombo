@@ -146,6 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Buckets.h" />
+    <ClInclude Include="Combinatorics.h" />
     <ClInclude Include="ExpressionParser.h" />
     <ClInclude Include="ComboVerifier.h" />
     <ClInclude Include="stdafx.h" />

@@ -3,33 +3,27 @@
 #include <array>
 #include <vector>
 #include <string>
+#include <map>
 
 #include <fstream>
 #include <iostream>
 
 #include "Buckets.h"
 #include "ExpressionParser.h"
+#include "Combinatorics.h"
 
 template<int CARDS>
 class ComboVerifier
 {
 public:
-  ComboVerifier() :
-    primitiveOperations_({ "+", "-", "*", "/" })
+  ComboVerifier(const bool debug = true) :
+    primitiveOperations_({ "+", "-", "*", "/" }),
+    debug_(debug)
   {
     Initialize();
   }
 
-  std::vector<std::array<int, CARDS>> ConstructAllHands(std::vector<int> validCards) {
-    if (validCards.size() == 0)
-      throw std::invalid_argument("No valid cards detected");
-
-    Buckets<CARDS> bucket;
-    for (size_t i = 0; i < validCards.size(); ++i) {
-      bucket.AddSpace(validCards[i]);
-    }
-    bucket.Initialize();
-
+  std::vector<std::array<int, CARDS>> ConstructUniqueHands(Buckets<CARDS>& bucket) {
     std::vector<std::array<int, CARDS>> hands = {};
     hands.push_back(bucket.GetItems());
     while (bucket.Increment())
@@ -37,13 +31,30 @@ public:
     return hands;
   }
 
-  std::vector<std::array<int, CARDS>> VerifyAllHands(const int target, const std::vector<std::array<int, CARDS>>& hands) {
+  std::vector<std::array<int, CARDS>> ConstructValidUniqueHands(const int target, const std::vector<std::array<int, CARDS>>& hands) {
     std::vector<std::array<int, CARDS>> validHands = {};
     for (auto& hand : hands) {
       if (VerifyHand(target, hand))
         validHands.push_back(hand);
     }
     return validHands;
+  }
+
+  size_t CalculateTotalHands(const std::vector<std::array<int, CARDS>>& hands, const Buckets<CARDS>& bucket) {
+    size_t count = 0;
+    const auto histogram = bucket.GetHistogram();
+    for (auto& hand : hands) {
+      std::map<int, size_t> cardCount = {};
+      for (auto& card : hand) {
+        cardCount[card]++;
+      }
+      size_t handCount = 1;
+      for (auto& card : cardCount) {
+        handCount *= Combinatorics::Combination(histogram.at(card.first), card.second);
+      } 
+      count += handCount;
+    }
+    return count;
   }
 
 protected:
@@ -71,27 +82,33 @@ protected:
             }
           }
           if (ExpressionParser::EvaluateExpression(operation) == target) {
-            std::string result = "";
-            for (auto& token : operation) {
-              result += token;
+            if (debug_) {
+              std::string result = "";
+              for (auto& token : operation) {
+                result += token;
+              }
+              goodFile_ << result << std::endl;
+              std::cout << ".";
             }
-            goodFile_ << result << std::endl;
-            std::cout << ".";
             return true;
           }
         }
       }
     }
-    std::string result = "";
-    for (auto& token : hand) {
-      result += std::to_string(token) + " ";
+    if (debug_) {
+
+      std::string result = "";
+      for (auto& token : hand) {
+        result += std::to_string(token) + " ";
+      }
+      badFile_ << result << std::endl;
+      std::cout << "X";
     }
-    badFile_ << result << std::endl;
-    std::cout << "X";
     return false;
   }
 
 private:
+  const bool debug_;
   std::ofstream badFile_;
   std::ofstream goodFile_;
   std::vector<std::vector<int>> order_;
@@ -167,7 +184,9 @@ private:
       primitives_.push_back(primitives);
     }
 
-    goodFile_.open("good.txt");
-    badFile_.open("bad.txt");
+    if (debug_) {
+      goodFile_.open("good.txt");
+      badFile_.open("bad.txt");
+    }
   }
 };

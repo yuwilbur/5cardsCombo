@@ -10,17 +10,17 @@ public:
   Buckets() = default;
 
   void AddSpace(const int item) {
-    if (bucketsMap_.find(item) == bucketsMap_.end()) {
-      bucketsMap_[item] = 1;
+    if (histogram_.find(item) == histogram_.end()) {
+      histogram_[item] = 1;
     }
     else {
-      bucketsMap_[item]++;
+      histogram_[item]++;
     }
   }
 
   void Initialize() {
-    for (auto& bucketMap : bucketsMap_) {
-      buckets_.push_back({ bucketMap.first, 0, bucketMap.second });
+    for (auto& histogram : histogram_) {
+      buckets_.push_back({ histogram.first, 0, histogram.second });
     }
 
     for (auto& item : items_) {
@@ -54,6 +54,12 @@ public:
         continue;
       buckets_[i + 1].filled++;
       buckets_[i].filled--;
+      for (size_t j = i + 1; j < buckets_.size() - 1; ++j) {
+        if (buckets_[j].filled <= buckets_[j].capacity)
+          break;
+        buckets_[j + 1].filled++;
+        buckets_[j].filled--;
+      }
       size_t filled = 0;
       for (size_t j = 0; j <= i; ++j) {
         filled += buckets_[j].filled;
@@ -93,7 +99,8 @@ public:
     std::cout << std::endl;
   }
 
-  std::array<int, ITEMS> GetItems() { return items_; }
+  const std::array<int, ITEMS>& GetItems() const { return items_; }
+  const std::map<int, size_t>& GetHistogram() const { return histogram_; }
 
 private:
   struct Bucket {
@@ -104,6 +111,6 @@ private:
 
   std::array<int, ITEMS> endItems_;
   std::array<int, ITEMS> items_;
-  std::map<int, size_t> bucketsMap_;
+  std::map<int, size_t> histogram_;
   std::vector<Bucket> buckets_;
 };
