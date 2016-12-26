@@ -17,9 +17,8 @@ int main()
   };
 
   auto allHands = cv.ConstructAllHands({ validCards });
-  //auto goodHands = cv.VerifyAllHands(2, allHands);
-  //std::cout << std::endl;
-  //std::cout << allHands.size() << " " << goodHands.size() << std::endl;
-  std::cout << allHands.size() << std::endl;
+  auto goodHands = cv.VerifyAllHands(2, allHands);
+  std::cout << std::endl;
+  std::cout << allHands.size() << " " << goodHands.size() << std::endl;
   return 0;
 }

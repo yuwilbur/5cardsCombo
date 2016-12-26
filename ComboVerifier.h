@@ -4,10 +4,13 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <utility>
 
 #include <fstream>
 #include <iostream>
+#include <map>
 
+#include "Buckets.h"
 #include "ExpressionParser.h"
 
 template<int CARDS>
@@ -23,46 +26,17 @@ public:
   std::vector<std::array<int, CARDS>> ConstructAllHands(std::vector<int> validCards) {
     if (validCards.size() == 0)
       throw std::invalid_argument("No valid cards detected");
-    std::sort(validCards.begin(), validCards.end());
+
+    Buckets<CARDS> bucket;
+    for (size_t i = 0; i < validCards.size(); ++i) {
+      bucket.AddSpace(validCards[i]);
+    }
+    bucket.Initialize();
+
     std::vector<std::array<int, CARDS>> hands = {};
-    std::array<size_t, CARDS> indexes = {};
-    for (size_t i = 0; i < indexes.size(); ++i) {
-      indexes[i] = i;
-    }
-
-    size_t indexesIndex = 0;
-    while (indexes[0] < validCards.size() - indexes.size()) {
-      std::array<int, CARDS> hand = {};
-      for (size_t i = 0; i < indexes.size(); ++i) {
-        hand[i] = validCards[indexes[i]];
-      }
-      bool isHandsNew = true;
-      for (int i = hands.size() - 1; i >= 0; --i) {
-        if (hands[i] == hand) {
-          isHandsNew = false;
-          break;
-        }
-      }
-      if (isHandsNew) {
-        hands.push_back(hand);
-      }
-        
-      if (indexes[indexesIndex] + 1 != indexes[indexesIndex + 1]) {
-        indexes[indexesIndex]++;
-        continue;
-      }
-      while (indexes[indexesIndex] + 1 == indexes[indexesIndex + 1]) {
-        indexesIndex++;
-        if (indexesIndex == indexes.size() - 1)
-          break;
-      }
-      indexes[indexesIndex]++;
-      for (size_t i = 0; i < indexesIndex; ++i) {
-        indexes[i] = i;
-      }
-      indexesIndex = 0;
-    }
-
+    hands.push_back(bucket.GetItems());
+    while (bucket.Increment())
+      hands.push_back(bucket.GetItems());
     return hands;
   }
 
