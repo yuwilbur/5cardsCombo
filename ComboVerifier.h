@@ -3,12 +3,9 @@
 #include <array>
 #include <vector>
 #include <string>
-#include <functional>
-#include <utility>
 
 #include <fstream>
 #include <iostream>
-#include <map>
 
 #include "Buckets.h"
 #include "ExpressionParser.h"
