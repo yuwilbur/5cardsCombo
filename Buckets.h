@@ -54,6 +54,8 @@ public:
         continue;
       buckets_[i].filled--;
       buckets_[i + 1].filled++;
+      
+      // Check for carry
       for (i = i + 1; i < buckets_.size() - 1; ++i) {
         if (buckets_[i].filled <= buckets_[i].capacity)
           break;
@@ -61,16 +63,20 @@ public:
         buckets_[i + 1].filled++;
       }
       i--;
-      size_t filled = 0;
-      for (size_t j = 0; j <= i; ++j) {
-        filled += buckets_[j].filled;
-        buckets_[j].filled = 0;
-      }
-      for (size_t j = 0; j < filled; ++j) {
-        for (auto& bucket : buckets_) {
-          if (bucket.filled != bucket.capacity) {
-            bucket.filled++;
-            break;
+
+      // Re-organize the number so it increments properly
+      if (i != 0) {
+        size_t filled = 0;
+        for (size_t j = 0; j <= i; ++j) {
+          filled += buckets_[j].filled;
+          buckets_[j].filled = 0;
+        }
+        for (size_t j = 0; j < filled; ++j) {
+          for (auto& bucket : buckets_) {
+            if (bucket.filled != bucket.capacity) {
+              bucket.filled++;
+              break;
+            }
           }
         }
       }
