@@ -17,7 +17,7 @@ int main()
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
     1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
   };
-  const size_t number_of_cards = 4;
+  const size_t number_of_cards = 5;
   ComboVerifier<number_of_cards> cv(false);
   Buckets<number_of_cards> bucket;
   for (size_t i = 0; i < validCards.size(); ++i) {

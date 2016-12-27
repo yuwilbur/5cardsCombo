@@ -52,14 +52,15 @@ public:
     for (size_t i = 0; i < buckets_.size() - 1; ++i) {
       if (buckets_[i].filled == 0)
         continue;
-      buckets_[i + 1].filled++;
       buckets_[i].filled--;
-      for (size_t j = i + 1; j < buckets_.size() - 1; ++j) {
-        if (buckets_[j].filled <= buckets_[j].capacity)
+      buckets_[i + 1].filled++;
+      for (i = i + 1; i < buckets_.size() - 1; ++i) {
+        if (buckets_[i].filled <= buckets_[i].capacity)
           break;
-        buckets_[j + 1].filled++;
-        buckets_[j].filled--;
+        buckets_[i].filled--;
+        buckets_[i + 1].filled++;
       }
+      i--;
       size_t filled = 0;
       for (size_t j = 0; j <= i; ++j) {
         filled += buckets_[j].filled;
