@@ -93,25 +93,44 @@ private:
   const bool debug_;
   std::ofstream badFile_;
   std::ofstream goodFile_;
-  std::vector<std::vector<int>> order_;
-  std::vector<std::vector<int>> brackets_;
-  std::vector<std::vector<int>> primitives_;
   std::vector<std::vector<std::string>> operations_;
-  std::array<std::string, 4> primitiveOperations_;
 
   void Initialize() {
-    primitiveOperations_ = { "+", "-", "*", "/" };
+    std::vector<std::vector<int>> orderCombinatinons;
+    std::vector<std::vector<int>> bracketsCombinations;
+    std::vector<std::vector<int>> primitivesCombinations;
+    const std::array<std::string, 4> primitiveOperations = { "+", "-", "*", "/" };
+    const std::map<std::string, size_t> primitivePrecedences = {
+      { "*", 3 },
+      { "/", 3 },
+      { "+", 2 },
+      { "-", 2 }
+    };
+
+    std::vector<int> order(CARDS);
+    for (size_t i = 0; i < order.size(); ++i) {
+      order[i] = i;
+    }
+    for (size_t i = 0; i < CARDS; ++i) {
+      orderCombinatinons.push_back(order);
+      const int orderTemp = order[0];
+      for (size_t j = 0; j < order.size() - 1; ++j) {
+        order[j] = order[j + 1];
+      }
+      order[order.size() - 1] = orderTemp;
+    }
+
     std::vector<int> originalBlacket(CARDS * 2 - 1);
     for (size_t i = 0; i < originalBlacket.size(); ++i) {
       originalBlacket[i] = i;
     }
-    brackets_.push_back(originalBlacket);
+    bracketsCombinations.push_back(originalBlacket);
     for (size_t cycle = 0; cycle < CARDS - 2; ++cycle) {
       std::vector<std::vector<int>> brackets = {};
-      for (int i = brackets_.size() - 1; i >= 0; --i) {
-        if (brackets_[i].size() < brackets_.back().size())
+      for (int i = bracketsCombinations.size() - 1; i >= 0; --i) {
+        if (bracketsCombinations[i].size() < bracketsCombinations.back().size())
           break;
-        const std::vector<int> bracket = brackets_[i];
+        const std::vector<int> bracket = bracketsCombinations[i];
         for (size_t start = 0; start < bracket.size(); ++start) {
           // Look for number
           if (bracket[start] < 0 || bracket[start] % 2 != 0)
@@ -139,25 +158,12 @@ private:
       }
       if (brackets.size() == 0)
         break;
-      brackets_.insert(brackets_.end(), brackets.begin(), brackets.end());
-    }
-
-    std::vector<int> order(CARDS);
-    for (size_t i = 0; i < order.size(); ++i) {
-      order[i] = i;
-    }
-    for (size_t i = 0; i < CARDS; ++i) {
-      order_.push_back(order);
-      const int orderTemp = order[0];
-      for (size_t j = 0; j < order.size() - 1; ++j) {
-        order[j] = order[j + 1];
-      }
-      order[order.size() - 1] = orderTemp;
+      bracketsCombinations.insert(bracketsCombinations.end(), brackets.begin(), brackets.end());
     }
 
     std::vector<int> primitives(CARDS - 1);
-    primitives_.push_back(primitives);
-    for (size_t i = 0; i < std::pow(primitiveOperations_.size(), primitives.size()) - 1; ++i) {
+    primitivesCombinations.push_back(primitives);
+    for (size_t i = 0; i < std::pow(primitiveOperations.size(), primitives.size()) - 1; ++i) {
       primitives[0]++;
       for (size_t j = 0; j < primitives.size(); ++j) {
         if (primitives[j] < 4)
@@ -165,12 +171,12 @@ private:
         primitives[j] = 0;
         primitives[j + 1]++;
       }
-      primitives_.push_back(primitives);
+      primitivesCombinations.push_back(primitives);
     }
 
-    for (auto& order : order_) {
-      for (auto& primitives : primitives_) {
-        for (auto& brackets : brackets_) {
+    for (auto& order : orderCombinatinons) {
+      for (auto& primitives : primitivesCombinations) {
+        for (auto& brackets : bracketsCombinations) {
           std::vector<std::string> operation = {};
           for (size_t i = 0; i < brackets.size(); ++i) {
             const int index = brackets[i];
@@ -182,9 +188,26 @@ private:
               if (index % 2 == 0)
                 operation.push_back("N" + std::to_string(order[index / 2]));
               else
-                operation.push_back(primitiveOperations_[primitives[index / 2]]);
+                operation.push_back(primitiveOperations[primitives[index / 2]]);
             }
           }
+          // Check if lowest inner precedence is equal or higher than precedence before or after it if so continue
+          bool isValid = true;
+          for (size_t i = 0; i < operation.size(); ++i) {
+            if (operation[i] != "(")
+              continue;
+            size_t outerPrecedence = 0;
+            size_t innerPrecedence = 4;
+            for (size_t j = 0; j < operation.size(); ++j) {
+
+            }
+            if (innerPrecedence >= outerPrecedence) {
+              isValid = false;
+              break;
+            }
+          }
+          if (!isValid)
+            continue;
           operations_.push_back(operation);
         }
       }
