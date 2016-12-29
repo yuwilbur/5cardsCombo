@@ -17,7 +17,6 @@ class ComboVerifier
 {
 public:
   ComboVerifier(const bool debug = true) :
-    primitiveOperations_({ "+", "-", "*", "/" }),
     debug_(debug)
   {
     Initialize();
@@ -51,7 +50,7 @@ public:
       size_t handCount = 1;
       for (auto& card : cardCount) {
         handCount *= Combinatorics::Combination(histogram.at(card.first), card.second);
-      } 
+      }
       count += handCount;
     }
     return count;
@@ -64,43 +63,26 @@ protected:
       handStr[i] = std::to_string(hand[i]);
     }
 
-    for (auto& order : order_) {
-      for (auto& primitives : primitives_) {
-        for (auto& brackets : brackets_) {
-          std::vector<std::string> operation = {};
-          for (size_t i = 0; i < brackets.size(); ++i) {
-            const int index = brackets[i];
-            if (index == -1)
-              operation.push_back("(");
-            else if (index == -2)
-              operation.push_back(")");
-            else {
-              if (index % 2 == 0)
-                operation.push_back(handStr[order[index / 2]]);
-              else
-                operation.push_back(primitiveOperations_[primitives[index / 2]]);
-            }
-          }
-          if (ExpressionParser::EvaluateExpression(operation) == target) {
-            if (debug_) {
-              std::string result = "";
-              for (auto& token : operation) {
-                result += token;
-              }
-              goodFile_ << result << std::endl;
-              std::cout << ".";
-            }
-            return true;
-          }
+    for (auto operation : operations_) {
+      for (auto& token : operation) {
+        if (token[0] == 'N')
+          token = handStr[std::stoi(token.substr(1))];
+      }
+      if (ExpressionParser::EvaluateExpression(operation) == target) {
+        if (debug_) {
+          std::string result = "";
+          for (auto& token : operation)
+            result += token;
+          goodFile_ << result << std::endl;
+          std::cout << ".";
         }
+        return true;
       }
     }
     if (debug_) {
-
       std::string result = "";
-      for (auto& token : hand) {
+      for (auto& token : hand)
         result += std::to_string(token) + " ";
-      }
       badFile_ << result << std::endl;
       std::cout << "X";
     }
@@ -114,9 +96,11 @@ private:
   std::vector<std::vector<int>> order_;
   std::vector<std::vector<int>> brackets_;
   std::vector<std::vector<int>> primitives_;
-  const std::array<std::string, 4> primitiveOperations_;
+  std::vector<std::vector<std::string>> operations_;
+  std::array<std::string, 4> primitiveOperations_;
 
   void Initialize() {
+    primitiveOperations_ = { "+", "-", "*", "/" };
     std::vector<int> originalBlacket(CARDS * 2 - 1);
     for (size_t i = 0; i < originalBlacket.size(); ++i) {
       originalBlacket[i] = i;
@@ -182,6 +166,28 @@ private:
         primitives[j + 1]++;
       }
       primitives_.push_back(primitives);
+    }
+
+    for (auto& order : order_) {
+      for (auto& primitives : primitives_) {
+        for (auto& brackets : brackets_) {
+          std::vector<std::string> operation = {};
+          for (size_t i = 0; i < brackets.size(); ++i) {
+            const int index = brackets[i];
+            if (index == -1)
+              operation.push_back("(");
+            else if (index == -2)
+              operation.push_back(")");
+            else {
+              if (index % 2 == 0)
+                operation.push_back("N" + std::to_string(order[index / 2]));
+              else
+                operation.push_back(primitiveOperations_[primitives[index / 2]]);
+            }
+          }
+          operations_.push_back(operation);
+        }
+      }
     }
 
     if (debug_) {
