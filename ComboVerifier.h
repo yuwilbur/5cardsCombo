@@ -65,7 +65,7 @@ protected:
 
     for (auto operation : operations_) {
       for (auto& token : operation) {
-        if (token[0] == 'N')
+        if (IsTokenNumber(token))
           token = handStr[std::stoi(token.substr(1))];
       }
       if (ExpressionParser::EvaluateExpression(operation) == target) {
@@ -191,31 +191,69 @@ private:
                 operation.push_back(primitiveOperations[primitives[index / 2]]);
             }
           }
-          // Check if lowest inner precedence is equal or higher than precedence before or after it if so continue
-          bool isValid = true;
-          for (size_t i = 0; i < operation.size(); ++i) {
-            if (operation[i] != "(")
+          
+          // Check if the brackets are necessary
+          size_t bracketsCount = 0;
+          bool isValid = false;
+          for (size_t end = 0; end < operation.size(); ++end) {
+            if (operation[end] != ")")
               continue;
-            size_t outerPrecedence = 0;
-            size_t innerPrecedence = 4;
-            for (size_t j = 0; j < operation.size(); ++j) {
-
+            bracketsCount++;
+            int start = end - 1;
+            size_t subBracketCount = 0;
+            for (; start >= 0; --start) {
+              if (operation[start] == ")")
+                subBracketCount++;
+              if (operation[start] == "(") {
+                if (subBracketCount == 0)
+                  break;
+                subBracketCount--;
+              }
             }
-            if (innerPrecedence >= outerPrecedence) {
-              isValid = false;
+
+            size_t innerPrecedence = 4;
+            for (size_t i = start + 1; i < end; ++i) {
+              if (operation[i] == "(" || operation[i] == ")")
+                continue;
+              if (IsTokenNumber(operation[i]))
+                continue;
+              innerPrecedence = std::min(innerPrecedence, primitivePrecedences.at(operation[i]));
+            }
+
+            size_t outerPrecedence = 0;
+            if (start > 0) {
+              const std::string preOperation = operation[start - 1];
+              if (preOperation != "(")
+                outerPrecedence = std::max(outerPrecedence, primitivePrecedences.at(preOperation));
+            }
+            if (end < operation.size() - 1) {
+              const std::string postOperation = operation[end + 1];
+              if (postOperation != ")")
+                outerPrecedence = std::max(outerPrecedence, primitivePrecedences.at(postOperation));
+            }
+
+            if (innerPrecedence == outerPrecedence)
+              break;
+            if (innerPrecedence < outerPrecedence) {
+              isValid = true;
               break;
             }
           }
-          if (!isValid)
+          if (!isValid && bracketsCount > 0)
             continue;
           operations_.push_back(operation);
         }
       }
     }
+    std::cout << operations_.size() << std::endl;
 
     if (debug_) {
       goodFile_.open("good.txt");
       badFile_.open("bad.txt");
     }
+  }
+
+  bool IsTokenNumber(const std::string& token) {
+    return token[0] == 'N';
   }
 };
