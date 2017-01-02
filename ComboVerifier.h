@@ -245,7 +245,6 @@ private:
         }
       }
     }
-    std::cout << operations_.size() << std::endl;
 
     if (debug_) {
       goodFile_.open("good.txt");
